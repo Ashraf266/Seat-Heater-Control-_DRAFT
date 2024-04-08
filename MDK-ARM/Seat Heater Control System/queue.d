@@ -1,0 +1,15 @@
+seat heater control system\queue.o: ..\FreeRTOS\src\queue.c
+seat heater control system\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+seat heater control system\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+seat heater control system\queue.o: ..\FreeRTOS\include\FreeRTOS.h
+seat heater control system\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+seat heater control system\queue.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+seat heater control system\queue.o: ..\FreeRTOS\include\FreeRTOSConfig.h
+seat heater control system\queue.o: ..\FreeRTOS\include\projdefs.h
+seat heater control system\queue.o: ..\FreeRTOS\include\portable.h
+seat heater control system\queue.o: ..\FreeRTOS\include\deprecated_definitions.h
+seat heater control system\queue.o: ..\FreeRTOS\include\portmacro.h
+seat heater control system\queue.o: ..\FreeRTOS\include\mpu_wrappers.h
+seat heater control system\queue.o: ..\FreeRTOS\include\task.h
+seat heater control system\queue.o: ..\FreeRTOS\include\list.h
+seat heater control system\queue.o: ..\FreeRTOS\include\queue.h

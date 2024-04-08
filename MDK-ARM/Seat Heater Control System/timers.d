@@ -1,0 +1,15 @@
+seat heater control system\timers.o: ..\FreeRTOS\src\timers.c
+seat heater control system\timers.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+seat heater control system\timers.o: ..\FreeRTOS\include\FreeRTOS.h
+seat heater control system\timers.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+seat heater control system\timers.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+seat heater control system\timers.o: ..\FreeRTOS\include\FreeRTOSConfig.h
+seat heater control system\timers.o: ..\FreeRTOS\include\projdefs.h
+seat heater control system\timers.o: ..\FreeRTOS\include\portable.h
+seat heater control system\timers.o: ..\FreeRTOS\include\deprecated_definitions.h
+seat heater control system\timers.o: ..\FreeRTOS\include\portmacro.h
+seat heater control system\timers.o: ..\FreeRTOS\include\mpu_wrappers.h
+seat heater control system\timers.o: ..\FreeRTOS\include\task.h
+seat heater control system\timers.o: ..\FreeRTOS\include\list.h
+seat heater control system\timers.o: ..\FreeRTOS\include\queue.h
+seat heater control system\timers.o: ..\FreeRTOS\include\timers.h

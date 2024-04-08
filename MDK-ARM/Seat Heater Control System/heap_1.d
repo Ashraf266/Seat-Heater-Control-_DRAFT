@@ -1,0 +1,13 @@
+seat heater control system\heap_1.o: ..\FreeRTOS\src\MemMang\heap_1.c
+seat heater control system\heap_1.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\FreeRTOS.h
+seat heater control system\heap_1.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+seat heater control system\heap_1.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\FreeRTOSConfig.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\projdefs.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\portable.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\deprecated_definitions.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\portmacro.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\mpu_wrappers.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\task.h
+seat heater control system\heap_1.o: ..\FreeRTOS\include\list.h

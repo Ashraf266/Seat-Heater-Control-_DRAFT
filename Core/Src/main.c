@@ -23,8 +23,27 @@
 #include "gpio.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "app.h"
+
+
+#define HIGH_PRIORITY 		3
+#define MEDIUM_PRIORITY 	2
+#define LOW_PRIORITY		 	1
 
 void SystemClock_Config(void);
+
+
+TaskHandle_t Driving_Wheel_Button_Task_Handler;
+TaskHandle_t Driver_Button_Task_Handler;
+TaskHandle_t Passanger_Button_Task_Handler;
+TaskHandle_t Driver_Seat_Temp_Read_Task_Handler;
+TaskHandle_t Passanger_Seat_Temp_Read_Task_Handler;
+TaskHandle_t Driver_Seat_Heater_Task_Handler;
+TaskHandle_t Passanger_Seat_Heater_Task_Handler;
+TaskHandle_t Display_Task_Handler;
+TaskHandle_t Control_Task_Handler;
+TaskHandle_t Failure_Task_Handler;
+TaskHandle_t Diagnostics_Task_Handler;
 
 
 /**
@@ -40,11 +59,30 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_UART_Init();
 	
+	
+	
+	
+	xTaskCreate(Task, "Driving Wheel Button Task", 					256, NULL, HIGH_PRIORITY, 	&Driving_Wheel_Button_Task_Handler);
+	xTaskCreate(Task, "Driver Seat Console Button Task", 		256, NULL, HIGH_PRIORITY, 	&Driver_Button_Task_Handler);
+	xTaskCreate(Task, "Passenger Seat Console Button Task", 256, NULL, HIGH_PRIORITY, 	&Passanger_Button_Task_Handler);
+	xTaskCreate(Task, "Driver Seat Temp Read Task", 				256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Temp_Read_Task_Handler);
+	xTaskCreate(Task, "Passenger Seat Temp Read Task", 			256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Temp_Read_Task_Handler);
+	xTaskCreate(Task, "Driver Seat Heater Task", 						256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Heater_Task_Handler);
+	xTaskCreate(Task, "Passanger Seat Heater Task", 				256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Heater_Task_Handler);
+	xTaskCreate(Task, "Display Task", 											256, NULL, LOW_PRIORITY, 		&Display_Task_Handler);
+	xTaskCreate(Task, "Control Task", 											256, NULL, MEDIUM_PRIORITY, &Control_Task_Handler);
+	xTaskCreate(Task, "Failure Handling Task", 							256, NULL, HIGH_PRIORITY, 	&Failure_Task_Handler);
+	xTaskCreate(Task, "Diagnostics Task", 									256, NULL, HIGH_PRIORITY, 	&Diagnostics_Task_Handler);
 
-  while (1)
-  {
-
-  }
+	
+	
+	
+	/* Start the scheduler so the created tasks start executing. */
+	vTaskStartScheduler();
+	
+	
+	/* The following line should never be reached. */
+	for (;;);
 
 }
 
