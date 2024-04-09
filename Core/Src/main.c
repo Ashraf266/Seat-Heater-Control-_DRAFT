@@ -72,7 +72,12 @@ typedef struct
 
 
 
-
+typedef struct
+{
+	ADC_HandleTypeDef *Channel;
+	uint8_t *TempVarAddress;
+	
+} TempReadTaskParameterType;
 
 
 
@@ -93,6 +98,19 @@ uint8_t g_ucPassengerSeatState = 0;
 ButtonTaskParameterType DrivingWheelButtonTaskParameter = {GPIOA, GPIO_PIN_3, &g_ucDriverSeatState};
 ButtonTaskParameterType DriverSeatConsoleButtonTaskParameter = {GPIOA, GPIO_PIN_4, &g_ucDriverSeatState};
 ButtonTaskParameterType PassengerSeatConsoleButtonTaskParameter = {GPIOA, GPIO_PIN_5, &g_ucPassengerSeatState};
+
+
+
+
+
+/* Global Variables for Temperature */
+uint8_t g_u16DriverSeatTemp = 0;
+uint8_t g_u16PassengerSeatTemp = 0;
+
+
+/* Parameters for Temp Read Tasks */
+TempReadTaskParameterType DriverSeatTempReadTaskParameter = {&hadc1, &g_u16DriverSeatTemp};
+TempReadTaskParameterType PassengerSeatTempReadTaskParameter = {&hadc1, &g_u16PassengerSeatTemp};
 
 /* -------------------------------------- Task Definitions ------------------------------------------------ */
 
@@ -146,6 +164,29 @@ void vButtonTask(void *pvParameters)
 
 
 
+void vTempReadTask(void *pvParameters)
+{
+	TempReadTaskParameterType *TempSensor = pvParameters;
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	uint16_t ADC_Value = 0;
+	
+	for(;;)
+	{
+		
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS( 500 ) );
+		// Start ADC conversion
+    HAL_ADC_Start(TempSensor->Channel);
+
+    // Wait for conversion to complete
+    HAL_ADC_PollForConversion(TempSensor->Channel, HAL_MAX_DELAY);
+
+    // Read ADC value
+     ADC_Value = HAL_ADC_GetValue(TempSensor->Channel);
+		
+		*(TempSensor->TempVarAddress) = (float)ADC_Value * 45 / 4095;
+	}
+	
+}
 
 
 
@@ -165,8 +206,7 @@ void vButtonTask(void *pvParameters)
 
 
 
-
-
+	BaseType_t creation_state = 5;
 
 
 
@@ -195,21 +235,22 @@ int main(void)
   MX_ADC1_Init();
   MX_USART1_UART_Init();
 	
-	
-	
-	/* Task Creation */
-	xTaskCreate(vButtonTask, "Driving Wheel Button Task", 					256, (void *)&DrivingWheelButtonTaskParameter, HIGH_PRIORITY, 	&Driving_Wheel_Button_Task_Handler);
-	xTaskCreate(vButtonTask, "Driver Seat Console Button Task", 		256, (void *)&DriverSeatConsoleButtonTaskParameter, HIGH_PRIORITY, 	&Driver_Button_Task_Handler);
-	xTaskCreate(vButtonTask, "Passenger Seat Console Button Task", 256, (void *)&PassengerSeatConsoleButtonTaskParameter, HIGH_PRIORITY, 	&Passanger_Button_Task_Handler);
-	xTaskCreate(Task, "Driver Seat Temp Read Task", 				256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Temp_Read_Task_Handler);
-	xTaskCreate(Task, "Passenger Seat Temp Read Task", 			256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Temp_Read_Task_Handler);
-	xTaskCreate(Task, "Driver Seat Heater Task", 						256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Heater_Task_Handler);
-	xTaskCreate(Task, "Passanger Seat Heater Task", 				256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Heater_Task_Handler);
-	xTaskCreate(Task, "Display Task", 											256, NULL, LOW_PRIORITY, 		&Display_Task_Handler);
-	xTaskCreate(Task, "Control Task", 											256, NULL, MEDIUM_PRIORITY, &Control_Task_Handler);
-	xTaskCreate(Task, "Failure Handling Task", 							256, NULL, HIGH_PRIORITY, 	&Failure_Task_Handler);
 
 	
+	/* Task Creation */
+	creation_state = xTaskCreate(vButtonTask, "Driving Wheel Button Task", 					256, 	(void *)&DrivingWheelButtonTaskParameter, 					HIGH_PRIORITY, 	&Driving_Wheel_Button_Task_Handler);
+	creation_state = xTaskCreate(vButtonTask, "Driver Seat Console Button Task", 		256, 	(void *)&DriverSeatConsoleButtonTaskParameter, 			HIGH_PRIORITY, 	&Driver_Button_Task_Handler);
+	creation_state = xTaskCreate(vButtonTask, "Passenger Seat Console Button Task", 	256, 	(void *)&PassengerSeatConsoleButtonTaskParameter, 	HIGH_PRIORITY, 	&Passanger_Button_Task_Handler);
+	creation_state = xTaskCreate(vTempReadTask, "Driver Seat Temp Read Task", 				256, 	(void *)&DriverSeatTempReadTaskParameter, 					MEDIUM_PRIORITY, &Driver_Seat_Temp_Read_Task_Handler);
+	creation_state = xTaskCreate(vTempReadTask, "Passenger Seat Temp Read Task", 		256, 	(void *)&PassengerSeatTempReadTaskParameter, 				MEDIUM_PRIORITY, &Passanger_Seat_Temp_Read_Task_Handler);
+	//creation_state = xTaskCreate(Task, "Driver Seat Heater Task", 										256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Heater_Task_Handler);
+	//creation_state = xTaskCreate(Task, "Passanger Seat Heater Task", 								256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Heater_Task_Handler);
+	//creation_state = xTaskCreate(Task, "Display Task", 															256, NULL, LOW_PRIORITY, 		&Display_Task_Handler);
+	//creation_state = xTaskCreate(Task, "Control Task", 															256, NULL, MEDIUM_PRIORITY, &Control_Task_Handler);
+	//creation_state = xTaskCreate(Task, "Failure Handling Task", 											256, NULL, HIGH_PRIORITY, 	&Failure_Task_Handler);
+
+	/* For Debugging */
+	creation_state = 5;
 	
 	
 	/* Start the scheduler so the created tasks start executing. */

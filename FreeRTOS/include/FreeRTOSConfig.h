@@ -60,10 +60,10 @@
 /******************************************************************************/
 
 /* Sets the total size of the FreeRTOS heap, in bytes, when heap_1.c, heap_2.c
- * or heap_4.c are included in the build. This value is defaulted to 4096 bytes but
+ * or heap_4.c are included in the build. This value is defaulted to 16384 bytes but
  * it must be tailored to each application. Note the heap will appear in the .bss
  * section. */
-#define configTOTAL_HEAP_SIZE                 ((size_t)(4096))
+#define configTOTAL_HEAP_SIZE                 ((size_t)(16384))
 
 /******************************************************************************/
 /* Definitions that include or exclude functionality. *************************/
