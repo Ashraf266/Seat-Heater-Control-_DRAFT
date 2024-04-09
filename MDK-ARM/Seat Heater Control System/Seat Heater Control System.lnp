@@ -9,7 +9,6 @@
 "seat heater control system\tasks.o"
 "seat heater control system\timers.o"
 "seat heater control system\heap_1.o"
-"seat heater control system\app.o"
 "seat heater control system\main.o"
 "seat heater control system\gpio.o"
 "seat heater control system\adc.o"

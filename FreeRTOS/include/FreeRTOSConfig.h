@@ -73,33 +73,7 @@
  * or 0 to exclude the named API function.  Most linkers will remove unused
  * functions even when the constant is 1. */
 #define INCLUDE_vTaskDelay                      1
-#define INCLUDE_xTimerPendFunctionCall          1
-
-/******************************************************************************/
-/* Software timer related definitions. ****************************************/
-/******************************************************************************/
-
-/* Set configUSE_TIMERS to 1 to include software timer functionality in the
- * build.  Set to 0 to exclude software timer functionality from the build.  The
- * FreeRTOS/source/timers.c source file must be included in the build if
- * configUSE_TIMERS is set to 1.  Default to 0 if left undefined. */
-#define configUSE_TIMERS                      1
-
-/* configTIMER_TASK_PRIORITY sets the priority used by the timer task.  Only
- * used if configUSE_TIMERS is set to 1.  The timer task is a standard FreeRTOS
- * task, so its priority is set like any other task. Only used if configUSE_TIMERS 
- * is set to 1. */
-#define configTIMER_TASK_PRIORITY             (configMAX_PRIORITIES - 1)
-
- /* configTIMER_QUEUE_LENGTH sets the length of the queue (the number of discrete
- * items the queue can hold) used to send commands to the timer task. Only used
- * if configUSE_TIMERS is set to 1. */
-#define configTIMER_QUEUE_LENGTH              10
-
-/* configTIMER_TASK_STACK_DEPTH sets the size of the stack allocated to the
- * timer task (in words, not in bytes!).  The timer task is a standard FreeRTOS
- * task. Only used if configUSE_TIMERS is set to 1. */
-#define configTIMER_TASK_STACK_DEPTH          configMINIMAL_STACK_SIZE
+#define INCLUDE_vTaskDelayUntil 				1
 
 /******************************************************************************/
 /* Hook and callback function related definitions. ****************************/

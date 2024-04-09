@@ -23,16 +23,15 @@
 #include "gpio.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "app.h"
 
-
+/* Priority Definitions */
 #define HIGH_PRIORITY 		3
 #define MEDIUM_PRIORITY 	2
 #define LOW_PRIORITY		 	1
 
 void SystemClock_Config(void);
 
-
+/* Tasks Handlers */
 TaskHandle_t Driving_Wheel_Button_Task_Handler;
 TaskHandle_t Driver_Button_Task_Handler;
 TaskHandle_t Passanger_Button_Task_Handler;
@@ -43,7 +42,144 @@ TaskHandle_t Passanger_Seat_Heater_Task_Handler;
 TaskHandle_t Display_Task_Handler;
 TaskHandle_t Control_Task_Handler;
 TaskHandle_t Failure_Task_Handler;
-TaskHandle_t Diagnostics_Task_Handler;
+
+
+
+
+/* ------- Temp Task ------- */
+void Task(void *pvParameters)
+{
+	
+	for(;;)
+	{
+		
+	}
+	
+}
+
+
+
+/* -------------------------------------- Types Declarations for Parameters ------------------------------------------------ */
+
+
+typedef struct
+{
+	GPIO_TypeDef *Port;
+	uint16_t Pin;
+	uint8_t *ButtonStateVarAddress;
+	
+} ButtonTaskParameterType;
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* -------------------------------------- GLOBAL VARIABLES ------------------------------------------------ */
+
+/* Global Variables for Heating States */
+uint8_t g_ucDriverSeatState = 0;
+uint8_t g_ucPassengerSeatState = 0;
+
+
+/* Parameters for Button Tasks */
+ButtonTaskParameterType DrivingWheelButtonTaskParameter = {GPIOA, GPIO_PIN_3, &g_ucDriverSeatState};
+ButtonTaskParameterType DriverSeatConsoleButtonTaskParameter = {GPIOA, GPIO_PIN_4, &g_ucDriverSeatState};
+ButtonTaskParameterType PassengerSeatConsoleButtonTaskParameter = {GPIOA, GPIO_PIN_5, &g_ucPassengerSeatState};
+
+/* -------------------------------------- Task Definitions ------------------------------------------------ */
+
+
+
+
+void vButtonTask(void *pvParameters)
+{
+	ButtonTaskParameterType* Button = pvParameters;
+	int flag = 0;
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	uint8_t ucButtonState;
+	for(;;)
+	{
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS( 150 ) );
+		ucButtonState = HAL_GPIO_ReadPin( Button->Port, Button->Pin);
+		
+		/* If the button is pressed */
+		if(ucButtonState == GPIO_PIN_RESET)
+		{
+			/* For Debouncing */
+			vTaskDelay(pdMS_TO_TICKS(30));
+			ucButtonState = HAL_GPIO_ReadPin( Button->Port, Button->Pin);
+			if(ucButtonState == GPIO_PIN_RESET)
+			{
+				if( flag == 0 )
+				{
+					/* Increase the state by 1 */
+					*(Button->ButtonStateVarAddress) = (*(Button->ButtonStateVarAddress)+1) %4;
+					
+				}
+				/* raise the flag so it doesn't change the state again */
+				flag = 1;
+			}
+			
+		}
+		/* If the button is not pressed */
+		else
+		{
+			flag = 0;
+		}
+		
+		
+		
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -61,10 +197,10 @@ int main(void)
 	
 	
 	
-	
-	xTaskCreate(Task, "Driving Wheel Button Task", 					256, NULL, HIGH_PRIORITY, 	&Driving_Wheel_Button_Task_Handler);
-	xTaskCreate(Task, "Driver Seat Console Button Task", 		256, NULL, HIGH_PRIORITY, 	&Driver_Button_Task_Handler);
-	xTaskCreate(Task, "Passenger Seat Console Button Task", 256, NULL, HIGH_PRIORITY, 	&Passanger_Button_Task_Handler);
+	/* Task Creation */
+	xTaskCreate(vButtonTask, "Driving Wheel Button Task", 					256, (void *)&DrivingWheelButtonTaskParameter, HIGH_PRIORITY, 	&Driving_Wheel_Button_Task_Handler);
+	xTaskCreate(vButtonTask, "Driver Seat Console Button Task", 		256, (void *)&DriverSeatConsoleButtonTaskParameter, HIGH_PRIORITY, 	&Driver_Button_Task_Handler);
+	xTaskCreate(vButtonTask, "Passenger Seat Console Button Task", 256, (void *)&PassengerSeatConsoleButtonTaskParameter, HIGH_PRIORITY, 	&Passanger_Button_Task_Handler);
 	xTaskCreate(Task, "Driver Seat Temp Read Task", 				256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Temp_Read_Task_Handler);
 	xTaskCreate(Task, "Passenger Seat Temp Read Task", 			256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Temp_Read_Task_Handler);
 	xTaskCreate(Task, "Driver Seat Heater Task", 						256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Heater_Task_Handler);
@@ -72,7 +208,6 @@ int main(void)
 	xTaskCreate(Task, "Display Task", 											256, NULL, LOW_PRIORITY, 		&Display_Task_Handler);
 	xTaskCreate(Task, "Control Task", 											256, NULL, MEDIUM_PRIORITY, &Control_Task_Handler);
 	xTaskCreate(Task, "Failure Handling Task", 							256, NULL, HIGH_PRIORITY, 	&Failure_Task_Handler);
-	xTaskCreate(Task, "Diagnostics Task", 									256, NULL, HIGH_PRIORITY, 	&Diagnostics_Task_Handler);
 
 	
 	
@@ -86,6 +221,64 @@ int main(void)
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --------------------------------------------------------------- STM_HAL stuff ----------------------------------------------*/
 
 
 /**

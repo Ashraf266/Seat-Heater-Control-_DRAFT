@@ -40,4 +40,3 @@ seat heater control system\main.o: ..\FreeRTOS\include\portmacro.h
 seat heater control system\main.o: ..\FreeRTOS\include\mpu_wrappers.h
 seat heater control system\main.o: ..\FreeRTOS\include\task.h
 seat heater control system\main.o: ..\FreeRTOS\include\list.h
-seat heater control system\main.o: ..\Application\inc\app.h
