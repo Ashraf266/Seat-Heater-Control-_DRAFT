@@ -80,6 +80,16 @@ typedef struct
 } TempReadTaskParameterType;
 
 
+typedef struct
+{
+	uint8_t Seat;
+	uint8_t *DesiredTempStateVarAddress;
+	uint8_t *SeatTempVarAddress;
+	uint8_t *HeatingIntensityLevel;
+	
+}ControlTaskParameterType;
+
+
 
 
 
@@ -104,13 +114,23 @@ ButtonTaskParameterType PassengerSeatConsoleButtonTaskParameter = {GPIOA, GPIO_P
 
 
 /* Global Variables for Temperature */
-uint8_t g_u16DriverSeatTemp = 0;
-uint8_t g_u16PassengerSeatTemp = 0;
+uint8_t g_u8DriverSeatTemp = 0;
+uint8_t g_u8PassengerSeatTemp = 0;
 
 
 /* Parameters for Temp Read Tasks */
-TempReadTaskParameterType DriverSeatTempReadTaskParameter = {&hadc1, &g_u16DriverSeatTemp};
-TempReadTaskParameterType PassengerSeatTempReadTaskParameter = {&hadc1, &g_u16PassengerSeatTemp};
+TempReadTaskParameterType DriverSeatTempReadTaskParameter = {&hadc1, &g_u8DriverSeatTemp};
+TempReadTaskParameterType PassengerSeatTempReadTaskParameter = {&hadc1, &g_u8PassengerSeatTemp};
+
+
+/* Global Variables for Heating Intensity */
+uint8_t g_u8DriverSeatHeaterIntensity = 0;
+uint8_t g_u8PassengerSeatHeaterIntensity = 0;
+
+
+/* Parameters for Control Tasks */
+ControlTaskParameterType DriverSeatControlTaskParameter = {0, &g_ucDriverSeatState, &g_u8DriverSeatTemp, &g_u8DriverSeatHeaterIntensity};
+ControlTaskParameterType PassangerSeatControlTaskParameter = {1, &g_ucPassengerSeatState, &g_u8PassengerSeatTemp, &g_u8PassengerSeatHeaterIntensity};
 
 /* -------------------------------------- Task Definitions ------------------------------------------------ */
 
@@ -153,7 +173,7 @@ void vButtonTask(void *pvParameters)
 			flag = 0;
 		}
 		
-		
+		// Add Diagnostics !!
 		
 	}
 	
@@ -183,6 +203,7 @@ void vTempReadTask(void *pvParameters)
     // Read ADC value
      ADC_Value = HAL_ADC_GetValue(TempSensor->Channel);
 		
+		// Get Temp Value and store it
 		*(TempSensor->TempVarAddress) = (float)ADC_Value * 45 / 4095;
 	}
 	
@@ -192,6 +213,90 @@ void vTempReadTask(void *pvParameters)
 
 
 
+
+/* kda hena ana m7tag f L parameters:
+				-Address L variable bta3 L Temp
+				-Address L variable bta3 L intensity
+				-Address bta3 L heating State 3shan a3rf L desired Temp
+
+				+ Momken a use L events 3shan a signal L failure f kda h7tag uint8_t by3br 3n which seat
+
+*/
+void vControlTask(void *pvParameters)
+{
+	ControlTaskParameterType *Seat = (ControlTaskParameterType *)pvParameters;
+	uint8_t Temp = 0;
+	uint8_t HeatingState = 0;
+	uint8_t DesiredTemp = 0;
+	signed char TempDiff = 0;
+	TickType_t xLastWakeTime = xTaskGetTickCount();
+	
+	for(;;)
+	{
+		vTaskDelayUntil( &xLastWakeTime, pdMS_TO_TICKS( 600 ) );
+		Temp = *(Seat->SeatTempVarAddress);
+		HeatingState = *(Seat->DesiredTempStateVarAddress);
+		
+		/* Check if Temp out of range */
+		if (Temp > 40 || Temp < 5)
+		{
+			//signal an event to the failure Task
+			
+			continue;
+		}
+		
+		/* Calculate Desired Temp */
+		/* NOTE: can be wrapped in a function */
+		switch( HeatingState )
+		{
+			case 0:
+				DesiredTemp = Temp;
+				break;
+			
+			case 1:
+				DesiredTemp = 25;
+				break;
+			
+			case 2:
+				DesiredTemp = 30;
+				break;
+			
+			case 3:
+				DesiredTemp = 35;
+				break;
+		}
+		
+		/* Temp Difference */
+		TempDiff = DesiredTemp - Temp;
+		
+		/* check for off */
+		if(  TempDiff <= 2 )
+		{
+			*(Seat->HeatingIntensityLevel) = 0;
+		}
+		/* check for low */
+		else if( TempDiff > 2 && TempDiff <= 5 )
+		{
+			*(Seat->HeatingIntensityLevel) = 1;
+		}
+		/* check for medium */
+		else if( TempDiff > 5 && TempDiff <= 10 )
+		{
+			*(Seat->HeatingIntensityLevel) = 2;
+		}
+		/* check for High */
+		else
+		{
+			*(Seat->HeatingIntensityLevel) = 3;
+		}
+		
+		
+		
+		
+	}
+	
+	
+}
 
 
 
@@ -246,8 +351,9 @@ int main(void)
 	//creation_state = xTaskCreate(Task, "Driver Seat Heater Task", 										256, NULL, MEDIUM_PRIORITY, &Driver_Seat_Heater_Task_Handler);
 	//creation_state = xTaskCreate(Task, "Passanger Seat Heater Task", 								256, NULL, MEDIUM_PRIORITY, &Passanger_Seat_Heater_Task_Handler);
 	//creation_state = xTaskCreate(Task, "Display Task", 															256, NULL, LOW_PRIORITY, 		&Display_Task_Handler);
-	//creation_state = xTaskCreate(Task, "Control Task", 															256, NULL, MEDIUM_PRIORITY, &Control_Task_Handler);
-	//creation_state = xTaskCreate(Task, "Failure Handling Task", 											256, NULL, HIGH_PRIORITY, 	&Failure_Task_Handler);
+	creation_state = xTaskCreate(vControlTask, "Driver Seat Control Task", 						256, (void *)&DriverSeatControlTaskParameter, MEDIUM_PRIORITY, &Control_Task_Handler);
+	creation_state = xTaskCreate(vControlTask, "Passenger Seat Control Task", 				256, (void *)&PassangerSeatControlTaskParameter, MEDIUM_PRIORITY, &Control_Task_Handler);
+	//creation_state = xTaskCreate(Task, "Failure Handling Task", 										256, NULL, HIGH_PRIORITY, 	&Failure_Task_Handler);
 
 	/* For Debugging */
 	creation_state = 5;
